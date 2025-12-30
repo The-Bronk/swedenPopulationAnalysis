@@ -1,0 +1,23 @@
+import pandas as pd
+import pathlib as path
+
+# Get the project root folder
+def GetProjectRoot() -> path.Path:
+    currentFile = path.Path(__file__).resolve()
+    #projectRoot = currentFile.parents[0]
+    return currentFile.parents[0]
+
+populationWithAge = pd.read_csv(GetProjectRoot()/'rawData/TAB5890_sv.csv', encoding= 'Latin1')
+
+#TODO skicka in ageGroupRange via UI
+def getPopulationWithAgeGroupes(ageGroupRange: range):
+    ageGroup = populationWithAge[populationWithAge['ålder'].isin(ageGroupRange)].groupby('Folkmängd, antal').sum()
+    return ageGroup
+
+
+#print(populationWithAge.head)
+#print(populationWithAge.tail)
+
+#TODO ta bort alla summeringsrader, ta bort all text " år" i resterande rader och konvertera till int
+sortedAgeGroup = getPopulationWithAgeGroupes(range(20, 67))
+print(sortedAgeGroup)
