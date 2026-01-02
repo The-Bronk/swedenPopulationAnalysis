@@ -7,7 +7,10 @@ def GetProjectRoot() -> path.Path:
     #projectRoot = currentFile.parents[0]
     return currentFile.parents[0]
 
-populationWithAge = pd.read_csv(GetProjectRoot()/'rawData/TAB5890_sv.csv', encoding= 'Latin1')
+#Import CSV excluding totals, clean row age and convert to integer
+populationWithAge = pd.read_csv(GetProjectRoot()/'rawData/TAB5890_sv.csv', nrows= 36630, encoding= 'Latin1')
+populationWithAge['ålder'] = populationWithAge['ålder'].astype('string').str.replace(r'[^0-9]', '', regex= True).astype('Int64')
+
 
 #TODO skicka in ageGroupRange via UI
 def getPopulationWithAgeGroupes(ageGroupRange: range):
@@ -15,9 +18,8 @@ def getPopulationWithAgeGroupes(ageGroupRange: range):
     return ageGroup
 
 
-#print(populationWithAge.head)
+print(populationWithAge.head)
 #print(populationWithAge.tail)
-
 #TODO ta bort alla summeringsrader, ta bort all text " år" i resterande rader och konvertera till int
-sortedAgeGroup = getPopulationWithAgeGroupes(range(20, 67))
-print(sortedAgeGroup)
+#sortedAgeGroup = getPopulationWithAgeGroupes(range(20, 67))
+#print(sortedAgeGroup)
