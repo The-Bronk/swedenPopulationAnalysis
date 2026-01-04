@@ -1,0 +1,87 @@
+import pandas as pd
+import pathlib as path
+import argparse
+
+# Get the project root folder
+def GetProjectRoot() -> path.Path:
+    currentFile = path.Path(__file__).resolve()
+    #projectRoot = currentFile.parents[0]
+    return currentFile.parents[1]
+
+def LoadData():
+        populationData= pd.read_csv(
+        GetProjectRoot()/'rawData/TAB5890_sv.csv', 
+        nrows= 36630, # excluding totals
+        encoding= 'Latin1')
+        return populationData
+
+def CleanAge(df):
+    df['ålder'] = (
+    df['ålder']
+    .astype('string')
+    .str.replace(r'[^0-9]', '', regex= True)
+    .astype('Int64')
+    )
+    return df
+
+def GetDataInformation(df):
+    print("\nIndex:")
+    print(df.index)
+
+    print("\nHead:")
+    print(df.head())
+
+    print("\nTail:")
+    print(df.tail())
+
+    print("\nInfo:")
+    df.info()
+
+    return df  # important if used in pipe later
+    
+
+#TODO skicka in ageGroupRange via UI
+def FilterByAge(df, ageGroupRange, ageColumn = 'ålder'):
+    return df[df[ageColumn].isin(ageGroupRange)]
+
+def FilterYear(df, yearRange, yearColumn = 'år'):
+    return df[df[yearColumn].isin(yearRange)]
+
+def SumMaleAndFemale(df, yearColumn = 'år', populationColumn = 'Folkmängd, antal'):
+    return df.groupby(yearColumn)[populationColumn].sum()
+
+# Cleaning Pipeline
+def CleanPopulationData(df):
+    return(
+        df
+        .pipe(CleanAge)
+    )
+
+#WRITE Analysis Pipeline
+def GetPopulationWithinAgeRange(df, ageRange, yearRange):
+    return(
+        df
+        .pipe(FilterByAge, ageRange)
+        .pipe(FilterYear, yearRange)
+        .pipe(SumMaleAndFemale)
+    )
+
+def main(check_data=False):
+    df = LoadData()
+
+    if check_data:
+        GetDataInformation(df)
+        return
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--check-data", action="store_true")
+    args = parser.parse_args()
+
+    main(check_data=args.check_data)
+#print(populationWithAge.head)
+#print(populationWithAge.tail)
+#populationWithAge = FilterByAge(populationWithAge, range(20,21))
+#populationWithAge = SumMaleAndFemale(populationWithAge)
+#populationWithAge = GetPopulationWithinAgeRange(populationWithAge, range(20,21), (range(2022,2023)))
+#print(populationWithAge)
